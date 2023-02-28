@@ -1,0 +1,2 @@
+#set port for this service to launch on
+server.port=8888

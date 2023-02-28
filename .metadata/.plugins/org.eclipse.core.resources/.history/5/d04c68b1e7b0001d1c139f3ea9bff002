@@ -1,0 +1,5 @@
+package com.nomaanlearn.rest.restfulwebservices.jpa;
+
+public interface UserRespository {
+
+}

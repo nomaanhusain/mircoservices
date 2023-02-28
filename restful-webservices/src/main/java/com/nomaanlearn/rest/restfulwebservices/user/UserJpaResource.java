@@ -1,0 +1,108 @@
+package com.nomaanlearn.rest.restfulwebservices.user;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.nomaanlearn.rest.restfulwebservices.jpa.PostRepository;
+import com.nomaanlearn.rest.restfulwebservices.jpa.UserRepository;
+
+import jakarta.validation.ReportAsSingleViolation;
+import jakarta.validation.Valid;
+
+@RestController
+public class UserJpaResource {
+
+	
+	private UserRepository userRepository;
+	private PostRepository postRepository;
+	
+	public UserJpaResource(UserRepository respository, PostRepository postRepository) {
+		this.userRepository=respository;
+		this.postRepository=postRepository;
+	}
+	
+	@GetMapping("/jpa/users")
+	public List<User> getAllUsers(){
+		return userRepository.findAll();
+	}
+	
+	
+	//We will implement links using hateoas here, it provides a standardized way of adding links to a api response
+	//EntityModel and WebMvcLinkBuilder are part of it
+	
+	@GetMapping("/jpa/users/{id}")
+	public EntityModel<User> getUserById(@PathVariable int id) {
+		Optional<User> userById = userRepository.findById(id);
+		if(userById == null || userById.isEmpty()) {
+			throw new UserNotFoundException("User with id: "+id +" not found");
+		}
+		
+		EntityModel<User> entityModel=EntityModel.of(userById.get());
+		
+		//hateoas stuff
+		WebMvcLinkBuilder link = WebMvcLinkBuilder.linkTo(
+				WebMvcLinkBuilder.methodOn(this.getClass()).getAllUsers());
+		entityModel.add(link.withRel("all-users"));
+		return entityModel;
+	}
+	
+	@DeleteMapping("/jpa/users/{id}")
+	public void deleteUserById(@PathVariable int id) {
+		userRepository.deleteById(id);
+	}
+	
+	@GetMapping("/jpa/users/{id}/posts")
+	public List<Posts> retrivePostByUser(@PathVariable int id) {
+		Optional<User> userById = userRepository.findById(id);
+		if(userById == null || userById.isEmpty()) {
+			throw new UserNotFoundException("User with id: "+id +" not found");
+		}
+		
+		return userById.get().getPosts();
+	}
+	
+	@PostMapping("/jpa/users/{id}/posts")
+	public ResponseEntity<Object> createPostForUser(@PathVariable int id,@Valid @RequestBody Posts posts) {
+		Optional<User> userById = userRepository.findById(id);
+		if(userById == null || userById.isEmpty()) {
+			throw new UserNotFoundException("User with id: "+id +" not found");
+		}
+		
+		posts.setUser(userById.get());
+		Posts savedpost=postRepository.save(posts);
+		
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(savedpost.getId()).toUri();
+		
+		return ResponseEntity.created(location).build();
+	}
+	
+	@PostMapping("/jpa/users")
+	public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+		User savedUser=userRepository.save(user);
+		
+		/**
+		ServletUriComponentsBuilder.fromCurrentRequest() will give url of current request
+		we want to expand that with the id of the new user and return that as part of the response
+		**/
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(savedUser.getId())
+				.toUri();	
+		//TO return response status as 201 with uri
+		return ResponseEntity.created(location).build();
+	}
+}

@@ -1,0 +1,5 @@
+package com.nomaanlearn.rest.restfulwebservices.security;
+
+public class SpringSecurityConfigration {
+
+}

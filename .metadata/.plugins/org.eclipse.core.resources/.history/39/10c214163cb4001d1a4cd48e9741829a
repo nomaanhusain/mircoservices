@@ -1,0 +1,15 @@
+package com.nomaanlearn.microservices.currencyexchangeservice.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+//building this contrller as an example for resileince4j ie. circuit breaker
+@RestController
+public class CircuitBreakerController {
+
+	@GetMapping("/sample-api")
+	public String sampleApi() {
+		return "Sample Api";
+	}
+}

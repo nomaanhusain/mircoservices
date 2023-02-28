@@ -1,0 +1,3 @@
+spring.application.name=spring-cloud-config-server
+#set port for this service to launch on
+server.port=8888

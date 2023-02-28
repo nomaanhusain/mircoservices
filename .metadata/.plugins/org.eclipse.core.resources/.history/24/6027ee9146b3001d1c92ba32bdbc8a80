@@ -1,0 +1,5 @@
+package com.nomaanlearn.microservices.currencyexchangeservice.repository;
+
+public interface CurrencyExchangeRepository {
+
+}

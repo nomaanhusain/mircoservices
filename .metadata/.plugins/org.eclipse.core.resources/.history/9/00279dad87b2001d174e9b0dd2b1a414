@@ -1,0 +1,2 @@
+#for spring cloud config serve
+spring.config.import=optional:configserver:http://localhost:8888

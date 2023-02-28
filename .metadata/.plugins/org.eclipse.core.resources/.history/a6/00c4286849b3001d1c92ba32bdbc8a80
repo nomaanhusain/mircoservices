@@ -1,0 +1,5 @@
+package com.nomaanlearn.microservices.currencyconversionservice.controller;
+
+public class CurrencyConversionController {
+
+}

@@ -1,0 +1,5 @@
+package com.nomaanlearn.microservices.currencyexchangeservice.model;
+
+public class CurrencyExchange {
+
+}
